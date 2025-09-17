@@ -6,7 +6,7 @@ interface ProfileStats {
   totalStudyTime: number;
   continuousDays: number;
   rankings: {
-    category: RankingCategory;  
+    category: RankingCategory;
     rank: number;
     totalParticipants: number;
   }[];
