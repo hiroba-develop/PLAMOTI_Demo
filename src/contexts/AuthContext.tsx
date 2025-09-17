@@ -1,21 +1,27 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
+import { User, RegisterRequest } from "../types";
 
-// ユーザー型定義
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  isSetupComplete: boolean;
-}
+// デフォルトユーザーデータ
+const createDefaultUser = (email: string, nickname: string, examDate: string, knowledgeLevel: string): User => ({
+  id: crypto.randomUUID(),
+  email,
+  nickname,
+  examDate,
+  knowledgeLevel: knowledgeLevel as any,
+  totalStudyTime: 0,
+  continuousDays: 0,
+  createdAt: new Date(),
+  lastLogin: new Date(),
+});
 
 // 認証コンテキストの型定義
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   shouldRedirectToLogin: boolean;
-  shouldRedirectToSetup: boolean;
   login: (email: string, password: string) => Promise<boolean>;
+  register: (data: RegisterRequest) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -27,16 +33,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [shouldRedirectToLogin, setShouldRedirectToLogin] = useState(false);
-  const [shouldRedirectToSetup, setShouldRedirectToSetup] = useState(false);
 
   // 初期化時にローカルストレージからユーザー情報を取得
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
+    const storedUser = localStorage.getItem("plamoti_user");
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
       setUser(parsedUser);
-      // ユーザーのセットアップ状態に基づいてリダイレクト設定
-      setShouldRedirectToSetup(!parsedUser.isSetupComplete);
+      setShouldRedirectToLogin(false);
     } else {
       setShouldRedirectToLogin(true);
     }
@@ -46,22 +50,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // ログイン処理
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      // デモ用の簡易認証
-      if (email && password) {
-        // 実際のアプリではAPIリクエストを行う
-        const demoUser: User = {
-          id: "demo-user-id",
-          name: "デモユーザー",
-          email: email,
-          isSetupComplete: true,
-        };
-
+      // デモ用の簡易認証 - 既存ユーザーをチェック
+      const existingUsers = JSON.parse(localStorage.getItem("plamoti_users") || "[]");
+      const existingUser = existingUsers.find((u: User) => u.email === email);
+      
+      if (existingUser) {
         // ユーザー情報をローカルストレージに保存
-        localStorage.setItem("user", JSON.stringify(demoUser));
-        setUser(demoUser);
+        localStorage.setItem("plamoti_user", JSON.stringify(existingUser));
+        setUser(existingUser);
         setShouldRedirectToLogin(false);
         return true;
       }
+      
       return false;
     } catch (error) {
       console.error("ログインエラー:", error);
@@ -69,9 +69,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // 新規登録処理
+  const register = async (data: RegisterRequest): Promise<boolean> => {
+    try {
+      // 既存ユーザーをチェック
+      const existingUsers = JSON.parse(localStorage.getItem("plamoti_users") || "[]");
+      const existingUser = existingUsers.find((u: User) => u.email === data.email);
+      
+      if (existingUser) {
+        return false; // 既に存在するユーザー
+      }
+
+      // 新しいユーザーを作成
+      const newUser = createDefaultUser(data.email, data.nickname, data.examDate, data.knowledgeLevel);
+      
+      // ユーザーリストに追加
+      const updatedUsers = [...existingUsers, newUser];
+      localStorage.setItem("plamoti_users", JSON.stringify(updatedUsers));
+      
+      // 現在のユーザーとして設定
+      localStorage.setItem("plamoti_user", JSON.stringify(newUser));
+      setUser(newUser);
+      setShouldRedirectToLogin(false);
+      return true;
+    } catch (error) {
+      console.error("登録エラー:", error);
+      return false;
+    }
+  };
+
   // ログアウト処理
   const logout = () => {
-    localStorage.removeItem("user");
+    localStorage.removeItem("plamoti_user");
     setUser(null);
     setShouldRedirectToLogin(true);
   };
@@ -82,8 +111,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         user,
         isLoading,
         shouldRedirectToLogin,
-        shouldRedirectToSetup,
         login,
+        register,
         logout,
       }}
     >

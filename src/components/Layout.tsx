@@ -4,9 +4,12 @@ import { useAuth } from "../contexts/AuthContext";
 
 // サイドバーのナビゲーションアイテム
 const navigationItems = [
-  { name: "ダッシュボード", path: "/" },
-  { name: "サンプルページ", path: "/sample" },
-  { name: "設定", path: "/settings" },
+  { name: "📊 ダッシュボード", path: "/", icon: "📊" },
+  { name: "📚 オンライン自習室", path: "/study-room", icon: "📚" },
+  { name: "📅 スケジュール管理", path: "/schedule", icon: "📅" },
+  { name: "🏆 ランキング", path: "/ranking", icon: "🏆" },
+  { name: "👤 プロフィール", path: "/profile", icon: "👤" },
+  { name: "⚙️ 設定", path: "/settings", icon: "⚙️" },
 ];
 
 interface LayoutProps {
@@ -26,26 +29,40 @@ const Layout = ({ children }: LayoutProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen" style={{ backgroundColor: '#FFEAEA' }}>
       {/* ヘッダー */}
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex">
               <div className="flex-shrink-0 flex items-center">
-                <span className="ml-2 text-xl font-bold">サンプルアプリ</span>
+                <span className="ml-2 text-2xl font-bold" style={{ color: '#6482AD' }}>
+                  PLAMOTI
+                </span>
+                <span className="ml-2 text-sm" style={{ color: '#6482AD' }}>
+                  プラモチ
+                </span>
               </div>
             </div>
             <div className="flex items-center">
               <div className="hidden md:ml-4 md:flex md:items-center">
                 <div className="ml-3 relative">
-                  <div className="flex items-center">
-                    <span className="mr-3 text-sm font-medium text-gray-700">
-                      {user?.name}
+                  <div className="flex items-center space-x-4">
+                    {/* プロフィール画像 */}
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm" style={{ backgroundColor: '#6482AD' }}>
+                      {user?.profileImage ? (
+                        <img src={user.profileImage} alt="Profile" className="w-full h-full rounded-full object-cover" />
+                      ) : (
+                        user?.nickname?.charAt(0).toUpperCase()
+                      )}
+                    </div>
+                    <span className="text-sm font-medium text-gray-700">
+                      {user?.nickname}
                     </span>
                     <button
                       onClick={handleLogout}
-                      className="px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700"
+                      className="px-3 py-1 text-sm text-white rounded hover:opacity-90 transition-opacity"
+                      style={{ backgroundColor: '#F564A9' }}
                     >
                       ログアウト
                     </button>
@@ -90,9 +107,13 @@ const Layout = ({ children }: LayoutProps) => {
                   to={item.path}
                   className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
                     location.pathname === item.path
-                      ? "border-blue-500 text-blue-700 bg-blue-50"
+                      ? "text-white"
                       : "border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800"
                   }`}
+                  style={{
+                    borderColor: location.pathname === item.path ? '#6482AD' : 'transparent',
+                    backgroundColor: location.pathname === item.path ? '#6482AD' : 'transparent'
+                  }}
                 >
                   {item.name}
                 </Link>
@@ -101,15 +122,19 @@ const Layout = ({ children }: LayoutProps) => {
             <div className="pt-4 pb-3 border-t border-gray-200">
               <div className="flex items-center px-4">
                 <div className="flex-shrink-0">
-                  <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                    <span className="text-lg font-medium text-gray-700">
-                      {user?.name.charAt(0)}
-                    </span>
+                  <div className="h-10 w-10 rounded-full flex items-center justify-center text-white font-bold" style={{ backgroundColor: '#6482AD' }}>
+                    {user?.profileImage ? (
+                      <img src={user.profileImage} alt="Profile" className="w-full h-full rounded-full object-cover" />
+                    ) : (
+                      <span className="text-lg font-medium">
+                        {user?.nickname?.charAt(0).toUpperCase()}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className="ml-3">
                   <div className="text-base font-medium text-gray-800">
-                    {user?.name}
+                    {user?.nickname}
                   </div>
                   <div className="text-sm font-medium text-gray-500">
                     {user?.email}
@@ -139,11 +164,24 @@ const Layout = ({ children }: LayoutProps) => {
                   <Link
                     key={item.name}
                     to={item.path}
-                    className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                    className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors ${
                       location.pathname === item.path
-                        ? "bg-blue-100 text-blue-700"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        ? "text-white"
+                        : "text-gray-600 hover:text-gray-900"
                     }`}
+                    style={{
+                      backgroundColor: location.pathname === item.path ? '#6482AD' : 'transparent'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (location.pathname !== item.path) {
+                        e.currentTarget.style.backgroundColor = '#9ECAD6';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (location.pathname !== item.path) {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }
+                    }}
                   >
                     {item.name}
                   </Link>
