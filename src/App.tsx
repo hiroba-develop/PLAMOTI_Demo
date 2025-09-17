@@ -7,7 +7,10 @@ import {
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
-import Sample from "./pages/Sample";
+import StudyRoom from "./pages/StudyRoom";
+import Schedule from "./pages/Schedule";
+import Ranking from "./pages/Ranking";
+import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import Login from "./pages/Login";
 import { useEffect } from "react";
@@ -74,8 +77,8 @@ const AppContent: React.FC = () => {
       document.head.appendChild(meta);
     }
 
-    // デモモード用のページタイトル設定
-    document.title = "サンプルアプリ - ログイン認証デモ";
+    // ページタイトル設定
+    document.title = "PLAMOTI - 基本情報技術者試験対策";
   }, []);
 
   return (
@@ -95,11 +98,41 @@ const AppContent: React.FC = () => {
         }
       />
       <Route
-        path="/sample"
+        path="/study-room"
         element={
           <ProtectedRoute>
             <Layout>
-              <Sample />
+              <StudyRoom />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/schedule"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Schedule />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/ranking"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Ranking />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Profile />
             </Layout>
           </ProtectedRoute>
         }
